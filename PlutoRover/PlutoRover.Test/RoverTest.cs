@@ -40,5 +40,15 @@ namespace PlutoRover.Test
             // Throws ArgumentOutOfRangeException as rover could navigate out of grid boundaries
             rover.Navigate("BLF"); // this should be invalid as the rover should not go out of bounds now!
         }
+
+        [TestMethod]
+        public void RoverNavigation_RoverToString_Test()
+        {
+            var rover = new Rover(0, 0, 'N', 100, 100);
+
+            rover.Navigate("FFRFF");
+
+            Assert.AreEqual("2, 2, facing East", rover.ToString());
+        }
     }
 }

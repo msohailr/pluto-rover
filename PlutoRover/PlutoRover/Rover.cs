@@ -89,6 +89,15 @@ namespace PlutoRover
             }
         }
 
+        /// <summary>
+        /// This method returns the current position and heading of the rover as a string
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            return $"{X}, {Y}, facing {Heading.ToString()}";
+        }
+
         #endregion
 
         #region Private Methods
