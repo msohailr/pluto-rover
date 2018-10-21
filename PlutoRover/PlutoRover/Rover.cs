@@ -25,12 +25,11 @@ namespace PlutoRover
 
         #region C'tor
 
-        public Rover(int x, int y, char heading, int gridX, int gridY)
+        public Rover(int x, int y, char heading, PlutoGrid grid)
         {
             X = x;
             Y = y;
-            GridX = gridX;
-            GridY = gridY;
+            Grid = grid;
             Heading = heading == 'N' ? Face.North : heading == 'E' ? Face.East : heading == 'S' ? Face.South : heading == 'W' ? Face.West : Face.None;
 
 
@@ -54,21 +53,41 @@ namespace PlutoRover
             foreach (char step in command)
             {
                 SaveCurrentState();
-
-                if ((step == 'F' && Heading == Face.North || step == 'B' && Heading == Face.South) && Y+1 < GridY)
+                
+                if ((step == 'F' && Heading == Face.North || step == 'B' && Heading == Face.South))
                 {
+                    if (HittingObstacle(X, Y + 1))
+                    {
+                        break;
+                    }
+
                     Y++;
                 }
-                else if ((step == 'F' && Heading == Face.South || step == 'B' && Heading == Face.North) && Y-1 > 0)
+                else if ((step == 'F' && Heading == Face.South || step == 'B' && Heading == Face.North))
                 {
+                    if (HittingObstacle(X, Y - 1))
+                    {
+                        break;
+                    }
+
                     Y--;
                 }
-                else if ((step == 'F' && Heading == Face.East || step == 'B' && Heading == Face.West) && X+1 < GridX)
+                else if ((step == 'F' && Heading == Face.East || step == 'B' && Heading == Face.West))
                 {
+                    if (HittingObstacle(X + 1, Y))
+                    {
+                        break;
+                    }
+
                     X++;
                 }
-                else if ((step == 'F' && Heading == Face.West || step == 'B' && Heading == Face.East) && X-1 > 0)
+                else if ((step == 'F' && Heading == Face.West || step == 'B' && Heading == Face.East))
                 {
+                    if (HittingObstacle(X - 1, Y))
+                    {
+                        break;
+                    }
+
                     X--;
                 }
                 else if (step == 'R')
@@ -102,20 +121,9 @@ namespace PlutoRover
 
         #region Private Methods
 
-        private bool IsWithinGrid()
-        {
-            if ((X > 0 && X < GridX) || (Y > 0 && Y < GridY))
-            {
-                return true;
-            }
-
-            return false;
-
-        }
-
         private void SaveCurrentState()
         {
-            currentState = new Rover(X, Y, Heading.ToString()[0], GridX, GridY);
+            currentState = new Rover(X, Y, Heading.ToString()[0], Grid);
         }
 
         private void ResetStateToPrevious()
@@ -123,8 +131,18 @@ namespace PlutoRover
             X = currentState.X;
             Y = currentState.Y;
             Heading = currentState.Heading;
-            GridX = currentState.GridX;
-            GridY = currentState.GridY;
+            Grid = currentState.Grid;
+        }
+
+        private bool HittingObstacle(int x, int y)
+        {
+            if (Grid.IsPointObstacle(x, y))
+            {
+                ObstacleReport = $"Found obstacle at {{{Grid.ObstacleDetails(x, y)}}}";
+                return true;
+            }
+
+            return false;
         }
 
         #endregion
@@ -134,13 +152,12 @@ namespace PlutoRover
         public int X { get; set; }
         
         public int Y { get; set; }
-
-        public int GridX { get; set; }
-
-        public int GridY { get; set; }
+      
+        public PlutoGrid Grid { get; set; }
 
         public Face Heading { get; set; }
 
+        public string ObstacleReport { get; set; }
         #endregion
     }
 }

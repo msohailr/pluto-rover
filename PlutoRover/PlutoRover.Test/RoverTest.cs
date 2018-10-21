@@ -10,7 +10,7 @@ namespace PlutoRover.Test
         public void RoverNavigation_SingleStep_Test()
         {
             // First test with a starting position and movement command
-            var rover = new Rover(0, 0, 'N', 100, 100);
+            var rover = new Rover(0, 0, 'N', new PlutoGrid(100, 100));
 
             rover.Navigate("F");
 
@@ -22,7 +22,7 @@ namespace PlutoRover.Test
         [TestMethod]
         public void RoverNavigation_MultipleSteps_Test()
         {
-            var rover = new Rover(0, 0, 'N', 100, 100);
+            var rover = new Rover(0, 0, 'N', new PlutoGrid(100, 100));
 
             rover.Navigate("FFRL");
 
@@ -32,23 +32,26 @@ namespace PlutoRover.Test
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentOutOfRangeException))]
-        public void RoverNavigation_GridLimit_Test()
-        {
-            var rover = new Rover(0, 0, 'N', 100, 100);
-
-            // Throws ArgumentOutOfRangeException as rover could navigate out of grid boundaries
-            rover.Navigate("BLF"); // this should be invalid as the rover should not go out of bounds now!
-        }
-
-        [TestMethod]
         public void RoverNavigation_RoverToString_Test()
         {
-            var rover = new Rover(0, 0, 'N', 100, 100);
+            var rover = new Rover(0, 0, 'N', new PlutoGrid(100, 100));
 
             rover.Navigate("FFRFF");
 
             Assert.AreEqual("2, 2, facing East", rover.ToString());
+        }
+
+        [TestMethod]
+        public void RoverNavigation_Obstacle_Test()
+        {
+            var grid = new PlutoGrid(100, 100);
+            grid.AddObstacle(10, 15);
+
+            var rover = new Rover(9, 12, 'N', grid);
+
+            rover.Navigate("FFFRF");
+
+            Assert.AreEqual("Found obstacle at {10, 15}", rover.ObstacleReport);
         }
     }
 }
