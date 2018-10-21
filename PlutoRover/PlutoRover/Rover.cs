@@ -19,15 +19,20 @@ namespace PlutoRover
     {
         #region Data
 
+        private Rover currentState;
+
         #endregion
 
         #region C'tor
 
-        public Rover(int x, int y, char heading)
+        public Rover(int x, int y, char heading, int gridX, int gridY)
         {
             X = x;
             Y = y;
+            GridX = gridX;
+            GridY = gridY;
             Heading = heading == 'N' ? Face.North : heading == 'E' ? Face.East : heading == 'S' ? Face.South : heading == 'W' ? Face.West : Face.None;
+
 
             if (Heading == Face.None)
             {
@@ -48,19 +53,21 @@ namespace PlutoRover
         {
             foreach (char step in command)
             {
-                if (step == 'F' && Heading == Face.North)
+                SaveCurrentState();
+
+                if ((step == 'F' && Heading == Face.North || step == 'B' && Heading == Face.South) && Y+1 < GridY)
                 {
                     Y++;
                 }
-                else if (step == 'F' && Heading == Face.East)
-                {
-                    X++;
-                }
-                else if (step == 'B' && Heading == Face.South)
+                else if ((step == 'F' && Heading == Face.South || step == 'B' && Heading == Face.North) && Y-1 > 0)
                 {
                     Y--;
                 }
-                else if (step == 'B' && Heading == Face.West)
+                else if ((step == 'F' && Heading == Face.East || step == 'B' && Heading == Face.West) && X+1 < GridX)
+                {
+                    X++;
+                }
+                else if ((step == 'F' && Heading == Face.West || step == 'B' && Heading == Face.East) && X-1 > 0)
                 {
                     X--;
                 }
@@ -74,7 +81,41 @@ namespace PlutoRover
                     // Turn left
                     Heading = (Heading - 1) < Face.North ? Face.West : Heading - 1;
                 }
+                else
+                {
+                    ResetStateToPrevious();
+                    throw new ArgumentOutOfRangeException("Rover has moved out of grid boundaries");
+                }
             }
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private bool IsWithinGrid()
+        {
+            if ((X > 0 && X < GridX) || (Y > 0 && Y < GridY))
+            {
+                return true;
+            }
+
+            return false;
+
+        }
+
+        private void SaveCurrentState()
+        {
+            currentState = new Rover(X, Y, Heading.ToString()[0], GridX, GridY);
+        }
+
+        private void ResetStateToPrevious()
+        {
+            X = currentState.X;
+            Y = currentState.Y;
+            Heading = currentState.Heading;
+            GridX = currentState.GridX;
+            GridY = currentState.GridY;
         }
 
         #endregion
@@ -84,6 +125,10 @@ namespace PlutoRover
         public int X { get; set; }
         
         public int Y { get; set; }
+
+        public int GridX { get; set; }
+
+        public int GridY { get; set; }
 
         public Face Heading { get; set; }
 
