@@ -53,5 +53,34 @@ namespace PlutoRover.Test
 
             Assert.AreEqual("Found obstacle at {10, 15}", rover.ObstacleReport);
         }
+
+        [TestMethod]
+        public void RoverNavigation_WrapGrid_Test()
+        {
+            var grid = new PlutoGrid(10, 10);
+            var rover = new Rover(8, 9, 'E', grid);
+
+            rover.Navigate("FFLFF");
+
+            Assert.AreEqual("10, 0, facing North", rover.ToString());
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof (ArgumentException))]
+        public void RoverNavigation_InvalidCommand_Test()
+        {
+            var grid = new PlutoGrid(10, 10);
+            var rover = new Rover(8, 9, 'E', grid);
+
+            rover.Navigate("FFC");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof (ArgumentException))]
+        public void RoverNavigation_InvalidHeading_Test()
+        {
+            var grid = new PlutoGrid(10, 10);
+            var rover = new Rover(8, 9, 'P', grid);
+        }
     }
 }

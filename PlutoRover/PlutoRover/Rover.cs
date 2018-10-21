@@ -35,7 +35,7 @@ namespace PlutoRover
 
             if (Heading == Face.None)
             {
-                throw new Exception($"Invalid face heading symbol: {heading}");
+                throw new ArgumentException($"Invalid face heading symbol: {heading}");
             }
         }
 
@@ -52,59 +52,32 @@ namespace PlutoRover
         {
             foreach (char step in command)
             {
-                SaveCurrentState();
-                
-                if ((step == 'F' && Heading == Face.North || step == 'B' && Heading == Face.South))
+                switch (step)
                 {
-                    if (HittingObstacle(X, Y + 1))
-                    {
+                    case 'R':
+                        // Turn right
+                        Heading = (Heading + 1) > Face.West ? Face.North : Heading + 1;
                         break;
-                    }
-
-                    Y++;
-                }
-                else if ((step == 'F' && Heading == Face.South || step == 'B' && Heading == Face.North))
-                {
-                    if (HittingObstacle(X, Y - 1))
-                    {
+                    case 'L':
+                        // Turn left
+                        Heading = (Heading - 1) < Face.North ? Face.West : Heading - 1;
                         break;
-                    }
-
-                    Y--;
-                }
-                else if ((step == 'F' && Heading == Face.East || step == 'B' && Heading == Face.West))
-                {
-                    if (HittingObstacle(X + 1, Y))
-                    {
+                    case 'F':
+                    case 'B':
+                        Move(step);
                         break;
-                    }
+                    default:
+                        throw new ArgumentException("Invalid command");
+                }
 
-                    X++;
-                }
-                else if ((step == 'F' && Heading == Face.West || step == 'B' && Heading == Face.East))
+                // Break the loop if rover has hit obstacle
+                if (!string.IsNullOrEmpty(ObstacleReport))
                 {
-                    if (HittingObstacle(X - 1, Y))
-                    {
-                        break;
-                    }
+                    break;
+                }
 
-                    X--;
-                }
-                else if (step == 'R')
-                {
-                    // Turn right
-                    Heading = (Heading + 1) > Face.West ? Face.North : Heading + 1;
-                }
-                else if (step == 'L')
-                {
-                    // Turn left
-                    Heading = (Heading - 1) < Face.North ? Face.West : Heading - 1;
-                }
-                else
-                {
-                    ResetStateToPrevious();
-                    throw new ArgumentOutOfRangeException("Rover has moved out of grid boundaries");
-                }
+                // Wrap around the grid if navigation has been successful
+                WrapGrid();
             }
         }
 
@@ -121,19 +94,6 @@ namespace PlutoRover
 
         #region Private Methods
 
-        private void SaveCurrentState()
-        {
-            currentState = new Rover(X, Y, Heading.ToString()[0], Grid);
-        }
-
-        private void ResetStateToPrevious()
-        {
-            X = currentState.X;
-            Y = currentState.Y;
-            Heading = currentState.Heading;
-            Grid = currentState.Grid;
-        }
-
         private bool HittingObstacle(int x, int y)
         {
             if (Grid.IsPointObstacle(x, y))
@@ -145,6 +105,66 @@ namespace PlutoRover
             return false;
         }
 
+        /// <summary>
+        /// Moves the rover according to step and current heading
+        /// </summary>
+        /// <param name="step">The step, either F or B</param>
+        private void Move(char step)
+        {
+            if ((step == 'F' && Heading == Face.North || step == 'B' && Heading == Face.South))
+            {
+                if (!HittingObstacle(X, Y + 1))
+                {
+                    Y++;
+                }
+            }
+            else if ((step == 'F' && Heading == Face.South || step == 'B' && Heading == Face.North))
+            {
+                if (!HittingObstacle(X, Y - 1))
+                {
+                    Y--;
+                }
+            }
+            else if ((step == 'F' && Heading == Face.East || step == 'B' && Heading == Face.West))
+            {
+                if (!HittingObstacle(X + 1, Y))
+                {
+                    X++;
+                }
+            }
+            else if ((step == 'F' && Heading == Face.West || step == 'B' && Heading == Face.East))
+            {
+                if (!HittingObstacle(X - 1, Y))
+                {
+                    X--;
+                }
+            }
+        }
+
+        /// <summary>
+        /// If reaching out to the end of grid, wrap around the coordinates 
+        /// according to which axis has gone out
+        /// </summary>
+        private void WrapGrid()
+        {
+            if (X < 0)
+            {
+                X = Grid.GridX;
+            }
+            else if (X > Grid.GridX)
+            {
+                X = 0;
+            }
+            if (Y < 0)
+            {
+                Y = Grid.GridY;
+            }
+            else if (Y > Grid.GridY)
+            {
+                Y = 0;
+            }
+        }
+        
         #endregion
 
         #region Properties
