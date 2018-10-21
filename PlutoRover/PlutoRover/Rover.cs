@@ -21,11 +21,62 @@ namespace PlutoRover
 
         #region Public Methods
 
-        public void Navigate(char command)
+        public void Navigate(string command)
         {
-            if (command == 'F' && Heading == 'N')
+            foreach (char step in command)
             {
-                Y++;
+                if (step == 'F' && Heading == 'N')
+                {
+                    Y++;
+                }
+                else if (step == 'F' && Heading == 'E')
+                {
+                    X++;
+                }
+                else if (step == 'B' && Heading == 'N')
+                {
+                    Y--;
+                }
+                else if (step == 'B' && Heading == 'W')
+                {
+                    X--;
+                }
+                else if (step == 'R')
+                {
+                    switch(Heading)
+                    {
+                        case 'N':
+                            Heading = 'E';
+                            break;
+                        case 'E':
+                            Heading = 'S';
+                            break;
+                        case 'S':
+                            Heading = 'W';
+                            break;
+                        case 'W':
+                            Heading = 'N';
+                            break;
+                    }
+                }
+                else if (step == 'L')
+                {
+                    switch (Heading)
+                    {
+                        case 'N':
+                            Heading = 'W';
+                            break;
+                        case 'W':
+                            Heading = 'S';
+                            break;
+                        case 'S':
+                            Heading = 'E';
+                            break;
+                        case 'E':
+                            Heading = 'N';
+                            break;
+                    }
+                }
             }
         }
 
