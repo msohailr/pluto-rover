@@ -16,7 +16,7 @@ namespace PlutoRover.Test
 
             Assert.AreEqual(0, rover.X);
             Assert.AreEqual(1, rover.Y);
-            Assert.AreEqual('N', rover.Heading);
+            Assert.AreEqual('N', rover.Heading.ToString()[0]);
         }
 
         [TestMethod]
@@ -24,11 +24,11 @@ namespace PlutoRover.Test
         {
             var rover = new Rover(0, 0, 'N');
 
-            rover.Navigate("FFR");
+            rover.Navigate("FFRL");
 
             Assert.AreEqual(0, rover.X);
             Assert.AreEqual(2, rover.Y);
-            Assert.AreEqual('E', rover.Heading);
+            Assert.AreEqual('N', rover.Heading.ToString()[0]); // Turn Right and then Left should bring to original heading
         }
     }
 }
